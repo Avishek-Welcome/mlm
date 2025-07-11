@@ -1,139 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MLM User Management System</title>
-<style>
-  body {
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #4f46e5, #3b82f6);
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-  }
-  .container {
-    background: rgba(255,255,255,0.1);
-    backdrop-filter: blur(12px);
-    border-radius: 20px;
-    padding: 2rem;
-    max-width: 400px;
-    width: 100%;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-  }
-  h2 {
-    text-align: center;
-    margin-bottom: 1rem;
-  }
-  input {
-    width: 100%;
-    padding: 0.75rem;
-    margin: 0.4rem 0;
-    border: none;
-    border-radius: 12px;
-    outline: none;
-  }
-  button {
-    width: 100%;
-    padding: 0.8rem;
-    margin-top: 0.8rem;
-    border: none;
-    border-radius: 12px;
-    background: #22c55e;
-    color: #fff;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  button:hover {
-    background: #16a34a;
-  }
-  #registerMessage, #downlineResult {
-    text-align: center;
-    margin-top: 0.6rem;
-    font-size: 0.9rem;
-  }
-  canvas {
-    margin-top: 1rem;
-    background: #fff;
-    border-radius: 10px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MLM System Home</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #ffffff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      text-align: center;
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #007BFF;
+    }
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    a.button {
+      text-decoration: none;
+      font-size: 18px;
+      padding: 14px 24px;
+      border-radius: 8px;
+      transition: background 0.3s;
+      width: 100%;
+      max-width: 300px;
+      margin: auto;
+      display: inline-block;
+    }
+    .register { background: #28a745; color: white; }
+    .register:hover { background: #218838; }
+
+    .login { background: #17a2b8; color: white; }
+    .login:hover { background: #138496; }
+
+    .admin { background: #ffc107; color: black; }
+    .admin:hover { background: #e0a800; }
+
+    .tree { background: #007BFF; color: white; }
+    .tree:hover { background: #0056b3; }
+
+    @media (max-width: 500px) {
+      .btn-group a {
+        font-size: 16px;
+        padding: 12px;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-  <h2>Register New User</h2>
-  <input type="text" id="userName" placeholder="User Name" />
-  <input type="tel" id="userId" placeholder="User ID (Phone Number)" />
-  <input type="tel" id="referrerId" placeholder="Referrer User ID" />
-  <button onclick="registerUser()">Register</button>
-  <p id="registerMessage"></p>
-
-  <h2>Check Downline</h2>
-  <input type="tel" id="trackUserId" placeholder="Enter User ID" />
-  <button onclick="trackDownline()">Check Downline</button>
-  <div id="downlineResult"></div>
-  <canvas id="downlineChart" width="300" height="200"></canvas>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  const scriptUrl = 'https://script.google.com/macros/s/AKfycby8oQy2XFWvrlrfrMurxV2OiKiy0KyRrIBo0XsrhfgvYKQAGCgFvtAnn5goFNUw2OBcqQ/exec';
-
-  function registerUser() {
-    const name = document.getElementById('userName').value.trim();
-    const userId = document.getElementById('userId').value.trim();
-    const referrerId = document.getElementById('referrerId').value.trim();
-    document.getElementById('registerMessage').innerText = 'Registering...';
-
-    fetch(scriptUrl, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'register', name, userId, referrerId }),
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById('registerMessage').innerText = data.message;
-    })
-    .catch(() => {
-      document.getElementById('registerMessage').innerText = '❌ Could not register user.';
-    });
-  }
-
-  function trackDownline() {
-    const userId = document.getElementById('trackUserId').value.trim();
-    document.getElementById('downlineResult').innerText = 'Loading...';
-
-    fetch(`${scriptUrl}?action=track&userId=${userId}`)
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById('downlineResult').innerHTML = Object.entries(data).map(([lvl, count]) => `<p>${lvl.toUpperCase()}: ${count}</p>`).join('');
-        drawChart(Object.values(data));
-      })
-      .catch(() => {
-        document.getElementById('downlineResult').innerText = '❌ Could not load downline.';
-      });
-  }
-
-  function drawChart(levels) {
-    const ctx = document.getElementById('downlineChart').getContext('2d');
-    if (window.downlineChartObj) window.downlineChartObj.destroy();
-    window.downlineChartObj = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['Level 1','2','3','4','5','6','7','8','9','10'],
-        datasets: [{
-          label: 'Users per level',
-          data: levels,
-          backgroundColor: '#22c55e'
-        }]
-      },
-      options: { scales: { y: { beginAtZero: true } } }
-    });
-  }
-</script>
+  <div class="container">
+    <h1>Welcome to MLM User System</h1>
+    <div class="btn-group">
+      <a href="register.html" class="button register">📝 Register</a>
+      <a href="user.html" class="button login">🔓 User Login</a>
+      <a href="admin.html" class="button admin">🛠️ Admin Panel</a>
+      <a href="tree.html" class="button tree">🌳 Referral Tree</a>
+    </div>
+  </div>
 </body>
 </html>
