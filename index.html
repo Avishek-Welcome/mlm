@@ -7,40 +7,54 @@
 <style>
   body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #4f46e5, #3b82f6);
     color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
   }
   .container {
-    max-width: 600px;
-    margin: auto;
-    padding: 2rem;
-  }
-  .card {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(12px);
     border-radius: 20px;
-    backdrop-filter: blur(10px);
     padding: 2rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
   }
-  input, button {
+  h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  input {
     width: 100%;
     padding: 0.75rem;
-    margin-top: 0.5rem;
+    margin: 0.4rem 0;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     outline: none;
   }
   button {
-    background: #4ade80;
-    color: #000;
+    width: 100%;
+    padding: 0.8rem;
+    margin-top: 0.8rem;
+    border: none;
+    border-radius: 12px;
+    background: #22c55e;
+    color: #fff;
     font-weight: bold;
     cursor: pointer;
     transition: background 0.3s;
   }
   button:hover {
-    background: #22c55e;
+    background: #16a34a;
+  }
+  #registerMessage, #downlineResult {
+    text-align: center;
+    margin-top: 0.6rem;
+    font-size: 0.9rem;
   }
   canvas {
     margin-top: 1rem;
@@ -51,99 +65,73 @@
 </head>
 <body>
 <div class="container">
+  <h2>Register New User</h2>
+  <input type="text" id="userName" placeholder="User Name" />
+  <input type="tel" id="userId" placeholder="User ID (Phone Number)" />
+  <input type="tel" id="referrerId" placeholder="Referrer User ID" />
+  <button onclick="registerUser()">Register</button>
+  <p id="registerMessage"></p>
 
-  <div class="card">
-    <h2>User Registration</h2>
-    <input type="text" id="userName" placeholder="User Name" />
-    <input type="tel" id="userId" placeholder="User ID (Phone Number)" />
-    <input type="tel" id="referrerId" placeholder="Referrer User ID" />
-    <button onclick="registerUser()">Register</button>
-    <p id="registerMessage"></p>
-  </div>
-
-  <div class="card">
-    <h2>Downline Tracker</h2>
-    <input type="tel" id="trackUserId" placeholder="Enter User ID to Track" />
-    <button onclick="trackDownline()">Check Downline</button>
-    <div id="downlineResult"></div>
-    <canvas id="downlineChart" width="400" height="300"></canvas>
-  </div>
-
+  <h2>Check Downline</h2>
+  <input type="tel" id="trackUserId" placeholder="Enter User ID" />
+  <button onclick="trackDownline()">Check Downline</button>
+  <div id="downlineResult"></div>
+  <canvas id="downlineChart" width="300" height="200"></canvas>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+  const scriptUrl = 'https://script.google.com/macros/s/AKfycby8oQy2XFWvrlrfrMurxV2OiKiy0KyRrIBo0XsrhfgvYKQAGCgFvtAnn5goFNUw2OBcqQ/exec';
+
   function registerUser() {
-    const name = document.getElementById('userName').value;
-    const userId = document.getElementById('userId').value;
-    const referrerId = document.getElementById('referrerId').value;
+    const name = document.getElementById('userName').value.trim();
+    const userId = document.getElementById('userId').value.trim();
+    const referrerId = document.getElementById('referrerId').value.trim();
     document.getElementById('registerMessage').innerText = 'Registering...';
 
-    fetch('https://script.google.com/macros/s/AKfycbzxjcIHFKdG-z0v3yoLU7lStNUq0HA2GnoOR3Cw1fp7q6jYk-DSri2XtrAqeJLYnfapKg/exec', {
+    fetch(scriptUrl, {
       method: 'POST',
-      body: JSON.stringify({
-        action: 'register',
-        name,
-        userId,
-        referrerId
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      body: JSON.stringify({ action: 'register', name, userId, referrerId }),
+      headers: { 'Content-Type': 'application/json' }
     })
     .then(res => res.json())
     .then(data => {
       document.getElementById('registerMessage').innerText = data.message;
     })
-    .catch(err => {
-      document.getElementById('registerMessage').innerText = 'Error registering user';
+    .catch(() => {
+      document.getElementById('registerMessage').innerText = '❌ Could not register user.';
     });
   }
 
   function trackDownline() {
-    const userId = document.getElementById('trackUserId').value;
+    const userId = document.getElementById('trackUserId').value.trim();
     document.getElementById('downlineResult').innerText = 'Loading...';
 
-    fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=track&userId=' + userId)
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById('downlineResult').innerHTML = `
-        <p>Level 1: ${data.level1}</p>
-        <p>Level 2: ${data.level2}</p>
-        <p>Level 3: ${data.level3}</p>
-        <p>Level 4: ${data.level4}</p>
-        <p>Level 5: ${data.level5}</p>
-        <p>Level 6: ${data.level6}</p>
-        <p>Level 7: ${data.level7}</p>
-        <p>Level 8: ${data.level8}</p>
-        <p>Level 9: ${data.level9}</p>
-        <p>Level 10: ${data.level10}</p>
-      `;
-      drawChart([data.level1,data.level2,data.level3,data.level4,data.level5,data.level6,data.level7,data.level8,data.level9,data.level10]);
-    })
-    .catch(err => {
-      document.getElementById('downlineResult').innerText = 'Error loading downline';
-    });
+    fetch(`${scriptUrl}?action=track&userId=${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('downlineResult').innerHTML = Object.entries(data).map(([lvl, count]) => `<p>${lvl.toUpperCase()}: ${count}</p>`).join('');
+        drawChart(Object.values(data));
+      })
+      .catch(() => {
+        document.getElementById('downlineResult').innerText = '❌ Could not load downline.';
+      });
   }
 
   function drawChart(levels) {
     const ctx = document.getElementById('downlineChart').getContext('2d');
-    if(window.downlineChartObj) window.downlineChartObj.destroy();
+    if (window.downlineChartObj) window.downlineChartObj.destroy();
     window.downlineChartObj = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: ['Level 1','2','3','4','5','6','7','8','9','10'],
         datasets: [{
-          label: 'Users in each level',
+          label: 'Users per level',
           data: levels,
-          backgroundColor: 'rgba(34, 197, 94, 0.8)'
+          backgroundColor: '#22c55e'
         }]
       },
-      options: {
-        scales: {
-          y: { beginAtZero: true }
-        }
-      }
+      options: { scales: { y: { beginAtZero: true } } }
     });
   }
 </script>
