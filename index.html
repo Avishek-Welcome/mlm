@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MLM User Management System</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+  }
+  .container {
+    max-width: 600px;
+    margin: auto;
+    padding: 2rem;
+  }
+  .card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+  input, button {
+    width: 100%;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    border: none;
+    border-radius: 10px;
+    outline: none;
+  }
+  button {
+    background: #4ade80;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  button:hover {
+    background: #22c55e;
+  }
+  canvas {
+    margin-top: 1rem;
+    background: #fff;
+    border-radius: 10px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="card">
+    <h2>User Registration</h2>
+    <input type="text" id="userName" placeholder="User Name" />
+    <input type="tel" id="userId" placeholder="User ID (Phone Number)" />
+    <input type="tel" id="referrerId" placeholder="Referrer User ID" />
+    <button onclick="registerUser()">Register</button>
+    <p id="registerMessage"></p>
+  </div>
+
+  <div class="card">
+    <h2>Downline Tracker</h2>
+    <input type="tel" id="trackUserId" placeholder="Enter User ID to Track" />
+    <button onclick="trackDownline()">Check Downline</button>
+    <div id="downlineResult"></div>
+    <canvas id="downlineChart" width="400" height="300"></canvas>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  function registerUser() {
+    const name = document.getElementById('userName').value;
+    const userId = document.getElementById('userId').value;
+    const referrerId = document.getElementById('referrerId').value;
+    document.getElementById('registerMessage').innerText = 'Registering...';
+
+    fetch('https://script.google.com/macros/s/AKfycbzxjcIHFKdG-z0v3yoLU7lStNUq0HA2GnoOR3Cw1fp7q6jYk-DSri2XtrAqeJLYnfapKg/exec', {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'register',
+        name,
+        userId,
+        referrerId
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('registerMessage').innerText = data.message;
+    })
+    .catch(err => {
+      document.getElementById('registerMessage').innerText = 'Error registering user';
+    });
+  }
+
+  function trackDownline() {
+    const userId = document.getElementById('trackUserId').value;
+    document.getElementById('downlineResult').innerText = 'Loading...';
+
+    fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=track&userId=' + userId)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('downlineResult').innerHTML = `
+        <p>Level 1: ${data.level1}</p>
+        <p>Level 2: ${data.level2}</p>
+        <p>Level 3: ${data.level3}</p>
+        <p>Level 4: ${data.level4}</p>
+        <p>Level 5: ${data.level5}</p>
+        <p>Level 6: ${data.level6}</p>
+        <p>Level 7: ${data.level7}</p>
+        <p>Level 8: ${data.level8}</p>
+        <p>Level 9: ${data.level9}</p>
+        <p>Level 10: ${data.level10}</p>
+      `;
+      drawChart([data.level1,data.level2,data.level3,data.level4,data.level5,data.level6,data.level7,data.level8,data.level9,data.level10]);
+    })
+    .catch(err => {
+      document.getElementById('downlineResult').innerText = 'Error loading downline';
+    });
+  }
+
+  function drawChart(levels) {
+    const ctx = document.getElementById('downlineChart').getContext('2d');
+    if(window.downlineChartObj) window.downlineChartObj.destroy();
+    window.downlineChartObj = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Level 1','2','3','4','5','6','7','8','9','10'],
+        datasets: [{
+          label: 'Users in each level',
+          data: levels,
+          backgroundColor: 'rgba(34, 197, 94, 0.8)'
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  }
+</script>
+</body>
+</html>
