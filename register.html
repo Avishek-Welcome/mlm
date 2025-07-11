@@ -72,7 +72,7 @@
   </div>
 
   <script>
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycby0SNzjJvi0orh-NEWxER6HxKWT9MGDB5X32f_QlhgOxB0HD1GjhftnrCSlgrxZ7Ipgjg/exec'; // Replace with actual deployed Apps Script URL
+    const GAS_URL = 'YOUR_SCRIPT_WEB_APP_URL'; // Replace with actual deployed Apps Script URL
 
     async function submitUser() {
       const name = document.getElementById('name').value.trim();
@@ -96,15 +96,20 @@
           })
         });
 
+        if (!response.ok) throw new Error('Request failed');
+
         const result = await response.json();
-        document.getElementById('msg').innerText = result.message;
         if (result.status === 'success') {
+          document.getElementById('msg').innerText = result.message;
           document.getElementById('name').value = '';
           document.getElementById('userId').value = '';
           document.getElementById('referId').value = '';
+        } else {
+          document.getElementById('msg').innerText = result.message || '❌ Failed to register user';
         }
       } catch (error) {
         document.getElementById('msg').innerText = '❌ Failed to register user';
+        console.error('Registration Error:', error);
       }
     }
   </script>
