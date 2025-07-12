@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌳 Referral Tree Viewer</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f0f4f8;
+    }
+    .tree-container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #007BFF;
+      margin-bottom: 20px;
+    }
+    input, button {
+      font-size: 16px;
+      padding: 10px;
+      width: 100%;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #218838;
+    }
+    .result {
+      white-space: pre-wrap;
+      font-family: monospace;
+      margin-top: 20px;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="tree-container">
+    <h2>🌳 View Referral Tree</h2>
+    <input type="text" id="treeUserId" placeholder="Enter USER ID to View Tree">
+    <button onclick="getReferralTree()">🌐 Load Tree</button>
+    <div class="result" id="treeResult">Tree structure will appear here...</div>
+  </div>
+
+  <script>
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycby8VCTlZFK_FmR56fJx0qzD_q_mJKNio7Orqmjzpsupv5FDJ9JlBhbnTui_yeAvZwW_RQ/exec'; // Replace with your script URL
+
+    async function getReferralTree() {
+      const userId = document.getElementById('treeUserId').value.trim();
+      const resultDiv = document.getElementById('treeResult');
+
+      if (!userId) {
+        resultDiv.textContent = '❌ Please enter a USER ID.';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${GAS_URL}?action=tree&userId=${encodeURIComponent(userId)}`);
+        const data = await res.json();
+
+        if (data.status === 'success') {
+          resultDiv.textContent = data.treeText;
+        } else {
+          resultDiv.textContent = data.message || '❌ No data found.';
+        }
+      } catch (err) {
+        console.error('Tree Error:', err);
+        resultDiv.textContent = '❌ Failed to load tree';
+      }
+    }
+  </script>
+</body>
+</html>
