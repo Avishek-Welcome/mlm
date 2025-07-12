@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🛠️ Admin Panel - MLM System</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f8f9fa;
+    }
+    .admin-panel {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #343a40;
+    }
+    input, button {
+      font-size: 16px;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin: 10px 0;
+      width: 100%;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      background: #f1f1f1;
+      border-radius: 6px;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-panel">
+    <h2>🛠️ Admin Dashboard</h2>
+    <input type="text" id="adminUserId" placeholder="Enter USER ID to View Earnings & Referrals">
+    <button onclick="getEarningsReport()">📊 Get Earnings Report</button>
+    <div class="result" id="adminResult">Results will appear here...</div>
+  </div>
+
+  <script>
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycby8VCTlZFK_FmR56fJx0qzD_q_mJKNio7Orqmjzpsupv5FDJ9JlBhbnTui_yeAvZwW_RQ/exec'; // Replace with your Apps Script Web App URL
+
+    async function getEarningsReport() {
+      const userId = document.getElementById('adminUserId').value.trim();
+      const resultBox = document.getElementById('adminResult');
+
+      if (!userId) {
+        resultBox.textContent = '❌ Please enter a USER ID.';
+        return;
+      }
+
+      try {
+        const response = await fetch(`${GAS_URL}?action=report&userId=${encodeURIComponent(userId)}`);
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          let output = `👤 USER ID: ${userId}\n`;
+          output += `💰 Total Earnings: ₹${data.totalEarnings}\n`;
+          output += `\n📦 Breakdown by Level:`;
+          for (const [level, users] of Object.entries(data.levels)) {
+            output += `\n  🔹 Level ${level} (${users.length} users)`;
+            users.forEach(u => {
+              output += `\n     - ${u.name} (₹${u.earnings})`;
+            });
+          }
+          resultBox.textContent = output;
+        } else {
+          resultBox.textContent = data.message || '❌ Unable to fetch data';
+        }
+      } catch (error) {
+        console.error('Admin Fetch Error:', error);
+        resultBox.textContent = '❌ Failed to fetch report';
+      }
+    }
+  </script>
+</body>
+</html>
