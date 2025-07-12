@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Login - MLM System</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #fdfbfb, #ebedee);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-box {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #007BFF;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #userInfo {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>🔓 User Login</h2>
+    <input type="text" id="loginUserId" placeholder="Enter USER ID (Phone)" required>
+    <button onclick="fetchUserDetails()">Login</button>
+    <div id="userInfo"></div>
+  </div>
+
+  <script>
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycby8VCTlZFK_FmR56fJx0qzD_q_mJKNio7Orqmjzpsupv5FDJ9JlBhbnTui_yeAvZwW_RQ/exec'; // Replace with your Apps Script URL
+
+    async function fetchUserDetails() {
+      const userId = document.getElementById('loginUserId').value.trim();
+      const userInfo = document.getElementById('userInfo');
+
+      if (!userId) {
+        userInfo.innerText = '❌ Please enter USER ID.';
+        return;
+      }
+
+      try {
+        const response = await fetch(GAS_URL + '?action=getUser&userId=' + encodeURIComponent(userId));
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          const u = result.user;
+          userInfo.innerHTML = `✅ Welcome <strong>${u.name}</strong><br>📱 USER ID: ${u.userId}<br>🤝 Referred By: ${u.referId || 'None'}<br>💰 Earnings: ₹${u.earnings}`;
+        } else {
+          userInfo.innerText = result.message || '❌ User not found';
+        }
+      } catch (error) {
+        console.error('Login Error:', error);
+        userInfo.innerText = '❌ Failed to fetch user info';
+      }
+    }
+  </script>
+</body>
+</html>
